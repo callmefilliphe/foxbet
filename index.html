@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FoxBet - Calculadora profissional de Value Bets com Kelly Criterion">
+    <meta name="keywords" content="apostas esportivas, value bet, kelly criterion, odds, apostas">
+    <title>FoxBet | Calculadora Value Bet Profissional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d3561 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .bot-card {
+            background: #0f1419;
+            border-radius: 25px;
+            padding: 0;
+            box-shadow: 0 25px 70px rgba(255, 107, 0, 0.3);
+            overflow: hidden;
+            border: 2px solid #ff6b00;
+        }
+
+        .bot-header {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bot-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+
+        .fox-logo {
+            width: 140px;
+            height: 140px;
+            background: rgba(15, 20, 25, 0.95);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .fox-icon {
+            font-size: 70px;
+            filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.5));
+        }
+
+        .brand-title {
+            color: white;
+            font-size: 3em;
+            font-weight: 900;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 5px;
+        }
+
+        .brand-tagline {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.1em;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            letter-spacing: 1px;
+        }
+
+        .bot-body {
+            padding: 35px;
+            background: #0f1419;
+        }
+
+        .section-title {
+            color: #ff6b00;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instruction {
+            background: linear-gradient(135deg, #1a1f2e 0%, #252a3a 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff6b00;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .instruction-title {
+            color: #ff6b00;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instruction-text {
+            color: #cbd5e1;
+            line-height: 1.8;
+            font-size: 0.95em;
+        }
+
+        .instruction-example {
+            background: #0a0e1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b00;
+            font-size: 1.2em;
+            text-align: center;
+            border: 2px solid #ff6b00;
+            font-weight: bold;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            color: #cbd5e1;
+            font-size: 1em;
+            margin-bottom: 10px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .odds-input {
+            width: 100%;
+            padding: 18px;
+            background: #1a1f2e;
+            border: 2px solid #2d3561;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .odds-input:focus {
+            outline: none;
+            border-color: #ff6b00;
+            box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.2);
+            background: #0f1419;
+        }
+
+        .bankroll-input {
+            width: 100%;
+            padding: 18px;
+            background: #1a1f2e;
+            border: 2px solid #2d3561;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+
+        .bankroll-input:focus {
+            outline: none;
+            border-color: #ff6b00;
+            box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.2);
+            background: #0f1419;
+        }
+
+        .unit-input {
+            width: 100%;
+            padding: 18px;
+            background: #1a1f2e;
+            border: 2px solid #2d3561;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+
+        .unit-input:focus {
+            outline: none;
+            border-color: #ff6b00;
+            box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.2);
+            background: #0f1419;
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.4em;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 25px rgba(255, 107, 0, 0.4);
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 107, 0, 0.6);
+        }
+
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 35px;
+            display: none;
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .result-header.negative {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+        }
+
+        .result-title {
+            color: white;
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .result-value-big {
+            color: white;
+            font-size: 3.5em;
+            font-weight: 900;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .result-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .result-item {
+            background: linear-gradient(135deg, #1a1f2e 0%, #252a3a 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #ff6b00;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .result-item-label {
+            color: #94a3b8;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .result-item-value {
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .units-section {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 25px;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
+        }
+
+        .units-title {
+            color: white;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .units-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .unit-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+
+        .unit-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .unit-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .unit-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .unit-ev-range {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9em;
+        }
+
+        .unit-amount {
+            color: white;
+            font-size: 2em;
+            font-weight: 900;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .unit-description {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85em;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border: 2px solid #3b82f6;
+        }
+
+        .info-title {
+            color: #93c5fd;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-text {
+            color: #dbeafe;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .error-box {
+            background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+            border: 3px solid #ef4444;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .error-text {
+            color: #fca5a5;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .info-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .pill {
+            background: #0a0e1a;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #ff6b00;
+            font-size: 0.85em;
+            border: 1px solid #ff6b00;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85em;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #2d3561;
+        }
+
+        .footer-fox {
+            color: #ff6b00;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .units-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-title {
+                font-size: 2.2em;
+            }
+
+            .result-value-big {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="bot-card">
+            <div class="bot-header">
+                <div class="fox-logo">
+                    <div class="fox-icon">🦊</div>
+                </div>
+                <div class="brand-title">FOXBET</div>
+                <div class="brand-tagline">Calculadora Value Bet Profissional</div>
+            </div>
+
+            <div class="bot-body">
+                <div class="instruction">
+                    <div class="instruction-title">
+                        <span>🎯</span>
+                        <span>Como usar:</span>
+                    </div>
+                    <div class="instruction-text">
+                        Digite as <strong>4 odds</strong> separadas por espaço:<br><br>
+                        <strong>📊 Odd 1:</strong> Base Pinnacle (referência)<br>
+                        <strong>📊 Odds 2 e 3:</strong> Outras odds Pinnacle<br>
+                        <strong>🎯 Odd 4:</strong> Odd onde vai apostar (Casa alvo)<br>
+                    </div>
+                    <div class="instruction-example">
+                        2.0 3.5 4.0 2.2
+                    </div>
+                    <div class="info-pills">
+                        <span class="pill">Ponto ou vírgula</span>
+                        <span class="pill">Separe por espaço</span>
+                        <span class="pill">4 odds obrigatórias</span>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <span>🦊</span>
+                    <span>Calcule seu Value Bet</span>
+                </div>
+
+                <div class="input-section">
+                    <label class="input-label">📝 Digite as 4 odds:</label>
+                    <textarea 
+                        class="odds-input" 
+                        id="oddsInput" 
+                        rows="2" 
+                        placeholder="2.0 3.5 4.0 2.2"
+                    ></textarea>
+                </div>
+
+                <div class="input-section">
+                    <label class="input-label">💰 Tamanho da sua banca (R$):</label>
+                    <input 
+                        type="number" 
+                        class="bankroll-input" 
+                        id="bankrollInput" 
+                        placeholder="1000"
+                        value="1000"
+                        step="0.01"
+                    >
+                </div>
+
+                <div class="input-section">
+                    <label class="input-label">📊 Valor de 1 unidade (R$):</label>
+                    <input 
+                        type="number" 
+                        class="unit-input" 
+                        id="unitInput" 
+                        placeholder="100"
+                        value="100"
+                        step="0.01"
+                    >
+                </div>
+
+                <button class="btn-calculate" onclick="calculateKelly()">
+                    🦊 Calcular Value Bet
+                </button>
+
+                <div id="results" class="results"></div>
+
+                <div class="footer">
+                    <strong class="footer-fox">FoxBet</strong> - Astúcia, Estratégia e Matemática 🦊
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateKelly() {
+            const input = document.getElementById('oddsInput').value.trim();
+            const bankroll = parseFloat(document.getElementById('bankrollInput').value);
+            const unitValue = parseFloat(document.getElementById('unitInput').value);
+            
+            if (!bankroll || bankroll <= 0) {
+                showError('🦊 Ops! Insira um valor válido para a banca!');
+                return;
+            }
+
+            if (!unitValue || unitValue <= 0) {
+                showError('🦊 Ops! Insira um valor válido para a unidade!');
+                return;
+            }
+
+            const oddsStr = input.replace(/,/g, '.').replace(/;/g, ' ').replace(/\n/g, ' ');
+            const odds = oddsStr.split(/\s+/).filter(x => x).map(x => parseFloat(x));
+
+            if (odds.length !== 4) {
+                showError('🦊 Você precisa digitar exatamente 4 odds! Você digitou ' + odds.length);
+                return;
+            }
+
+            if (odds.some(x => isNaN(x) || x <= 1)) {
+                showError('🦊 Todas as odds precisam ser números maiores que 1!');
+                return;
+            }
+
+            const [odd1, odd2, odd3, odd4] = odds;
+
+            const prob1 = 1 / odd1;
+            const prob2 = 1 / odd2;
+            const prob3 = 1 / odd3;
+            const totalProb = prob1 + prob2 + prob3;
+            const trueProb = prob1 / totalProb;
+            const ev = (odd4 * trueProb) - 1;
+
+            const b = odd4 - 1;
+            const p = trueProb;
+            const q = 1 - p;
+            
+            let kellyFraction = ((b * p) - q) / b;
+
+            if (kellyFraction < 0) {
+                kellyFraction = 0;
+            }
+
+            if (kellyFraction > 0.20) {
+                kellyFraction = 0.20;
+            }
+
+            const fullKelly = kellyFraction * bankroll;
+
+            displayResults({
+                odd1, odd2, odd3, odd4,
+                trueProb,
+                ev,
+                kellyFraction,
+                fullKelly,
+                bankroll,
+                unitValue
+            });
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            const hasValue = data.ev > 0;
+            const evPercent = (data.ev * 100).toFixed(2);
+            const kellyPercent = (data.kellyFraction * 100).toFixed(2);
+
+            let html = '';
+
+            if (hasValue) {
+                // Determinar unidades baseado no EV
+                let units = {
+                    u025: { range: '0-2%', amount: 0.25, description: 'Micro Edge' },
+                    u050: { range: '2-5%', amount: 0.50, description: 'Edge Pequeno' },
+                    u075: { range: '5-8%', amount: 0.75, description: 'Edge Médio' },
+                    u100: { range: '8%+', amount: 1.00, description: 'Edge Grande' }
+                };
+
+                let recommendedUnits = 0.25;
+                if (data.ev < 0.02) {
+                    recommendedUnits = 0.25;
+                } else if (data.ev < 0.05) {
+                    recommendedUnits = 0.50;
+                } else if (data.ev < 0.08) {
+                    recommendedUnits = 0.75;
+                } else {
+                    recommendedUnits = 1.00;
+                }
+
+                html = `
+                    <div class="result-header">
+                        <div class="result-title">🦊 VALUE BET ENCONTRADO!</div>
+                        <div class="result-value-big">+${evPercent}%</div>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-item-label">📊 Probabilidade Real (Pinnacle)</div>
+                            <div class="result-item-value">${(data.trueProb * 100).toFixed(2)}%</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">💎 Expected Value (EV)</div>
+                            <div class="result-item-value" style="color: #10b981;">+${evPercent}%</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">🎯 Kelly Criterion</div>
+                            <div class="result-item-value">${kellyPercent}% da banca</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">⭐ Unidades Recomendadas</div>
+                            <div class="result-item-value" style="color: #7c3aed;">${recommendedUnits}u</div>
+                        </div>
+                    </div>
+
+                    <div class="units-section">
+                        <div class="units-title">📊 Sistema de Unidades FoxBet</div>
+                        <div class="units-subtitle">Aposte baseado no tamanho do seu edge (EV)</div>
+                        <div class="units-grid">
+                            <div class="unit-card" style="${recommendedUnits === 0.25 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                                <div class="unit-card-header">
+                                    <span class="unit-badge">0.25u</span>
+                                    <span class="unit-ev-range">EV: 0-2%</span>
+                                </div>
+                                <div class="unit-amount">R$ ${(0.25 * data.unitValue).toFixed(2)}</div>
+                                <div class="unit-description">Edge Pequeno • Baixo Risco</div>
+                            </div>
+
+                            <div class="unit-card" style="${recommendedUnits === 0.50 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                                <div class="unit-card-header">
+                                    <span class="unit-badge">0.50u</span>
+                                    <span class="unit-ev-range">EV: 2-5%</span>
+                                </div>
+                                <div class="unit-amount">R$ ${(0.50 * data.unitValue).toFixed(2)}</div>
+                                <div class="unit-description">Edge Moderado • Risco Médio</div>
+                            </div>
+
+                            <div class="unit-card" style="${recommendedUnits === 0.75 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                                <div class="unit-card-header">
+                                    <span class="unit-badge">0.75u</span>
+                                    <span class="unit-ev-range">EV: 5-8%</span>
+                                </div>
+                                <div class="unit-amount">R$ ${(0.75 * data.unitValue).toFixed(2)}</div>
+                                <div class="unit-description">Edge Bom • Risco Elevado</div>
+                            </div>
+
+                            <div class="unit-card" style="${recommendedUnits === 1.00 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                                <div class="unit-card-header">
+                                    <span class="unit-badge">1.00u</span>
+                                    <span class="unit-ev-range">EV: 8%+</span>
+                                </div>
+                                <div class="unit-amount">R$ ${(1.00 * data.unitValue).toFixed(2)}</div>
+                                <div class="unit-description">Edge Excelente • Máxima Confiança</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">
+                            🦊 Recomendação FoxBet
+                        </div>
+                        <div class="info-text">
+                            Baseado no seu EV de <strong>+${evPercent}%</strong>, recomendamos apostar <strong>${recommendedUnits}u</strong> (R$ ${(recommendedUnits * data.unitValue).toFixed(2)}).<br><br>
+                            O sistema de unidades permite escalar suas apostas proporcionalmente ao tamanho do edge, maximizando lucro enquanto controla risco.
+                        </div>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div class="result-header negative">
+                        <div class="result-title">❌ SEM VALUE</div>
+                        <div class="result-value-big">${evPercent}%</div>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-item-label">📊 Probabilidade Real (Pinnacle)</div>
+                            <div class="result-item-value">${(data.trueProb * 100).toFixed(2)}%</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">💎 Expected Value (EV)</div>
+                            <div class="result-item-value" style="color: #ef4444;">${evPercent}%</div>
+                        </div>
+                    </div>
+
+                    <div class="error-box">
+                        <div class="error-text">
+                            🦊 <strong>NÃO APOSTE!</strong><br><br>
+                            A odd oferecida (${data.odd4.toFixed(2)}) está abaixo do valor justo (${(1/data.trueProb).toFixed(2)}). 
+                            Esta aposta tem EV negativo e causará perdas no longo prazo.<br><br>
+                            <strong>Aguarde uma oportunidade com value positivo! 🎯</strong>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="error-box">
+                    <div class="error-text">
+                        <strong>❌ Erro:</strong><br><br>
+                        ${message}
+                    </div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+        }
+
+        document.getElementById('oddsInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                calculateKelly();
+            }
+        });
+
+        document.getElementById('bankrollInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                calculateKelly();
+            }
+        });
+
+        document.getElementById('unitInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                calculateKelly();
+            }
+        });
+    </script>
+</body>
+</html>
