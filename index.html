@@ -155,6 +155,31 @@
             font-weight: bold;
         }
 
+        .market-btn {
+            flex: 1;
+            padding: 15px;
+            background: #1a1f2e;
+            border: 2px solid #2d3561;
+            border-radius: 10px;
+            color: #cbd5e1;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .market-btn:hover {
+            border-color: #ff6b00;
+            background: #252a3a;
+        }
+
+        .market-btn.active {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            border-color: #ff6b00;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4);
+        }
+
         .input-section {
             margin-bottom: 25px;
         }
@@ -482,24 +507,62 @@
             </div>
 
             <div class="bot-body">
-                <div class="instruction">
+                <div class="section-title">
+                    <span>⚙️</span>
+                    <span>Escolha o tipo de mercado</span>
+                </div>
+
+                <div class="input-section">
+                    <div style="display: flex; gap: 15px;">
+                        <button class="market-btn active" id="market3" onclick="selectMarket(3)">
+                            🎯 3 Resultados (1X2)
+                        </button>
+                        <button class="market-btn" id="market2" onclick="selectMarket(2)">
+                            ⚡ 2 Resultados
+                        </button>
+                    </div>
+                </div>
+
+                <div class="instruction" id="instruction3">
                     <div class="instruction-title">
                         <span>🎯</span>
-                        <span>Como usar:</span>
+                        <span>Mercado 3 Resultados (1X2):</span>
                     </div>
                     <div class="instruction-text">
                         Digite as <strong>4 odds</strong> separadas por espaço:<br><br>
-                        <strong>📊 Odd 1:</strong> Base Pinnacle (referência)<br>
-                        <strong>📊 Odds 2 e 3:</strong> Outras odds Pinnacle<br>
-                        <strong>🎯 Odd 4:</strong> Odd onde vai apostar (Casa alvo)<br>
+                        <strong>📊 Odd 1:</strong> Base Pinnacle (Casa)<br>
+                        <strong>📊 Odd 2:</strong> Empate Pinnacle<br>
+                        <strong>📊 Odd 3:</strong> Fora Pinnacle<br>
+                        <strong>🎯 Odd 4:</strong> Odd onde vai apostar<br>
                     </div>
                     <div class="instruction-example">
                         2.0 3.5 4.0 2.2
                     </div>
                     <div class="info-pills">
+                        <span class="pill">4 odds obrigatórias</span>
                         <span class="pill">Ponto ou vírgula</span>
                         <span class="pill">Separe por espaço</span>
-                        <span class="pill">4 odds obrigatórias</span>
+                    </div>
+                </div>
+
+                <div class="instruction" id="instruction2" style="display: none;">
+                    <div class="instruction-title">
+                        <span>⚡</span>
+                        <span>Mercado 2 Resultados:</span>
+                    </div>
+                    <div class="instruction-text">
+                        Digite as <strong>3 odds</strong> separadas por espaço:<br><br>
+                        <strong>📊 Odd 1:</strong> Base Pinnacle (Time 1)<br>
+                        <strong>📊 Odd 2:</strong> Contrária Pinnacle (Time 2)<br>
+                        <strong>🎯 Odd 3:</strong> Odd onde vai apostar<br>
+                    </div>
+                    <div class="instruction-example">
+                        2.1 1.7 2.5
+                    </div>
+                    <div class="info-pills">
+                        <span class="pill">3 odds obrigatórias</span>
+                        <span class="pill">Moneyline, Handicap, etc</span>
+                        <span class="pill">Separe por espaço</span>
                     </div>
                 </div>
 
@@ -556,6 +619,24 @@
     </div>
 
     <script>
+        let selectedMarket = 3; // Padrão: 3 resultados
+
+        function selectMarket(market) {
+            selectedMarket = market;
+            
+            // Atualizar botões
+            document.getElementById('market2').classList.remove('active');
+            document.getElementById('market3').classList.remove('active');
+            document.getElementById('market' + market).classList.add('active');
+            
+            // Atualizar instruções
+            document.getElementById('instruction2').style.display = market === 2 ? 'block' : 'none';
+            document.getElementById('instruction3').style.display = market === 3 ? 'block' : 'none';
+            
+            // Limpar resultados
+            document.getElementById('results').style.display = 'none';
+        }
+
         function calculateKelly() {
             const input = document.getElementById('oddsInput').value.trim();
             const bankroll = parseFloat(document.getElementById('bankrollInput').value);
@@ -574,50 +655,101 @@
             const oddsStr = input.replace(/,/g, '.').replace(/;/g, ' ').replace(/\n/g, ' ');
             const odds = oddsStr.split(/\s+/).filter(x => x).map(x => parseFloat(x));
 
-            if (odds.length !== 4) {
-                showError('🦊 Você precisa digitar exatamente 4 odds! Você digitou ' + odds.length);
-                return;
+            if (selectedMarket === 3) {
+                // Mercado 3 resultados
+                if (odds.length !== 4) {
+                    showError('🦊 Mercado 3 resultados: você precisa digitar 4 odds! Você digitou ' + odds.length);
+                    return;
+                }
+
+                if (odds.some(x => isNaN(x) || x <= 1)) {
+                    showError('🦊 Todas as odds precisam ser números maiores que 1!');
+                    return;
+                }
+
+                const [odd1, odd2, odd3, odd4] = odds;
+
+                const prob1 = 1 / odd1;
+                const prob2 = 1 / odd2;
+                const prob3 = 1 / odd3;
+                const totalProb = prob1 + prob2 + prob3;
+                const trueProb = prob1 / totalProb;
+                const ev = (odd4 * trueProb) - 1;
+
+                const b = odd4 - 1;
+                const p = trueProb;
+                const q = 1 - p;
+                
+                let kellyFraction = ((b * p) - q) / b;
+
+                if (kellyFraction < 0) {
+                    kellyFraction = 0;
+                }
+
+                if (kellyFraction > 0.20) {
+                    kellyFraction = 0.20;
+                }
+
+                const fullKelly = kellyFraction * bankroll;
+
+                displayResults({
+                    odd4,
+                    trueProb,
+                    ev,
+                    kellyFraction,
+                    fullKelly,
+                    bankroll,
+                    unitValue,
+                    fairOdd: 1 / trueProb
+                });
+
+            } else {
+                // Mercado 2 resultados
+                if (odds.length !== 3) {
+                    showError('🦊 Mercado 2 resultados: você precisa digitar 3 odds! Você digitou ' + odds.length);
+                    return;
+                }
+
+                if (odds.some(x => isNaN(x) || x <= 1)) {
+                    showError('🦊 Todas as odds precisam ser números maiores que 1!');
+                    return;
+                }
+
+                const [odd1, odd2, odd3] = odds;
+
+                const prob1 = 1 / odd1;
+                const prob2 = 1 / odd2;
+                const totalProb = prob1 + prob2;
+                const trueProb = prob1 / totalProb;
+                const ev = (odd3 * trueProb) - 1;
+
+                const b = odd3 - 1;
+                const p = trueProb;
+                const q = 1 - p;
+                
+                let kellyFraction = ((b * p) - q) / b;
+
+                if (kellyFraction < 0) {
+                    kellyFraction = 0;
+                }
+
+                if (kellyFraction > 0.20) {
+                    kellyFraction = 0.20;
+                }
+
+                const fullKelly = kellyFraction * bankroll;
+
+                displayResults({
+                    odd4: odd3,
+                    trueProb,
+                    ev,
+                    kellyFraction,
+                    fullKelly,
+                    bankroll,
+                    unitValue,
+                    fairOdd: 1 / trueProb
+                });
             }
-
-            if (odds.some(x => isNaN(x) || x <= 1)) {
-                showError('🦊 Todas as odds precisam ser números maiores que 1!');
-                return;
-            }
-
-            const [odd1, odd2, odd3, odd4] = odds;
-
-            const prob1 = 1 / odd1;
-            const prob2 = 1 / odd2;
-            const prob3 = 1 / odd3;
-            const totalProb = prob1 + prob2 + prob3;
-            const trueProb = prob1 / totalProb;
-            const ev = (odd4 * trueProb) - 1;
-
-            const b = odd4 - 1;
-            const p = trueProb;
-            const q = 1 - p;
-            
-            let kellyFraction = ((b * p) - q) / b;
-
-            if (kellyFraction < 0) {
-                kellyFraction = 0;
-            }
-
-            if (kellyFraction > 0.20) {
-                kellyFraction = 0.20;
-            }
-
-            const fullKelly = kellyFraction * bankroll;
-
-            displayResults({
-                odd1, odd2, odd3, odd4,
-                trueProb,
-                ev,
-                kellyFraction,
-                fullKelly,
-                bankroll,
-                unitValue
-            });
         }
 
         function displayResults(data) {
@@ -751,7 +883,7 @@
                     <div class="error-box">
                         <div class="error-text">
                             🦊 <strong>NÃO APOSTE!</strong><br><br>
-                            A odd oferecida (${data.odd4.toFixed(2)}) está abaixo do valor justo (${(1/data.trueProb).toFixed(2)}). 
+                            A odd oferecida (${data.odd4.toFixed(2)}) está abaixo do valor justo (${data.fairOdd.toFixed(2)}). 
                             Esta aposta tem EV negativo e causará perdas no longo prazo.<br><br>
                             <strong>Aguarde uma oportunidade com value positivo! 🎯</strong>
                         </div>
