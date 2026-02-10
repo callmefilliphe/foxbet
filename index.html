@@ -503,7 +503,7 @@
                     <div class="fox-icon">🦊</div>
                 </div>
                 <div class="brand-title">FOXBET</div>
-                <div class="brand-tagline">Calculadora Value Bet Profissional</div>
+                <div class="brand-tagline">Calculadora Value Bet v3.0 OTIMIZADO</div>
             </div>
 
             <div class="bot-body">
@@ -635,7 +635,8 @@
                 <div id="results" class="results"></div>
 
                 <div class="footer">
-                    <strong class="footer-fox">FoxBet</strong> - Astúcia, Estratégia e Matemática 🦊
+                    <strong class="footer-fox">FoxBet v3.0 OTIMIZADO</strong> - Astúcia, Estratégia e Matemática 🦊<br>
+                    <small style="color: #64748b;">Sistema de stakes ajustado por odd - Proteção contra variância</small>
                 </div>
             </div>
         </div>
@@ -827,28 +828,42 @@
             const hasValue = data.ev > 0;
             const evPercent = (data.ev * 100).toFixed(2);
             const kellyPercent = (data.kellyFraction * 100).toFixed(2);
+            const odd = data.odd4;
 
             let html = '';
 
             if (hasValue) {
-                // Determinar unidades baseado no EV
-                let units = {
-                    u025: { range: '0-2%', amount: 0.25, description: 'Micro Edge' },
-                    u050: { range: '2-5%', amount: 0.50, description: 'Edge Pequeno' },
-                    u075: { range: '5-8%', amount: 0.75, description: 'Edge Médio' },
-                    u100: { range: '8%+', amount: 1.00, description: 'Edge Grande' }
-                };
-
-                let recommendedUnits = 0.25;
-                if (data.ev < 0.02) {
-                    recommendedUnits = 0.25;
-                } else if (data.ev < 0.05) {
-                    recommendedUnits = 0.50;
-                } else if (data.ev < 0.08) {
-                    recommendedUnits = 0.75;
-                } else {
-                    recommendedUnits = 1.00;
+                // Sistema OTIMIZADO: Ajusta stake por EV E odd
+                function getRecommendedUnits(ev, odd) {
+                    // Base por EV
+                    let base;
+                    if (ev < 0.02) base = 0.25;
+                    else if (ev < 0.05) base = 0.50;
+                    else if (ev < 0.08) base = 0.75;
+                    else base = 1.00;
+                    
+                    // Multiplicador por odd
+                    let mult;
+                    if (odd < 2.5) mult = 1.0;       // Favoritos
+                    else if (odd < 4.0) mult = 0.75; // Médias
+                    else if (odd < 7.0) mult = 0.50; // Altas
+                    else mult = 0.35;                // Muito altas
+                    
+                    return Math.round(base * mult * 100) / 100;
                 }
+                
+                function getAdjustedStake(baseUnits, odd, unitValue) {
+                    let mult;
+                    if (odd < 2.5) mult = 1.0;
+                    else if (odd < 4.0) mult = 0.75;
+                    else if (odd < 7.0) mult = 0.50;
+                    else mult = 0.35;
+                    
+                    return (baseUnits * mult * unitValue).toFixed(2);
+                }
+
+                const recommendedUnits = getRecommendedUnits(data.ev, odd);
+                const recommendedStake = recommendedUnits * data.unitValue;
 
                 html = `
                     <div class="result-header">
@@ -873,60 +888,61 @@
                         </div>
 
                         <div class="result-item">
-                            <div class="result-item-label">⭐ Unidades Recomendadas</div>
-                            <div class="result-item-value" style="color: #7c3aed;">${recommendedUnits}u</div>
+                            <div class="result-item-label">⭐ Stake Recomendado ${odd >= 4.0 ? '🛡️' : ''}</div>
+                            <div class="result-item-value" style="color: #7c3aed;">${recommendedUnits}u (R$ ${recommendedStake.toFixed(2)})</div>
                         </div>
                     </div>
 
                     <div class="units-section">
-                        <div class="units-title">📊 Sistema de Unidades FoxBet</div>
-                        <div class="units-subtitle">Aposte baseado no tamanho do seu edge (EV)</div>
+                        <div class="units-title">📊 Sistema OTIMIZADO FoxBet v3.0</div>
+                        <div class="units-subtitle">⭐ Stake ajustado por EV + Odd (proteção contra variância)</div>
                         <div class="units-grid">
-                            <div class="unit-card" style="${recommendedUnits === 0.25 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                            <div class="unit-card" style="${recommendedUnits === parseFloat(getAdjustedStake(0.25, odd, 1)) ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
                                 <div class="unit-card-header">
-                                    <span class="unit-badge">0.25u</span>
+                                    <span class="unit-badge">0.25u base</span>
                                     <span class="unit-ev-range">EV: 0-2%</span>
                                 </div>
-                                <div class="unit-amount">R$ ${(0.25 * data.unitValue).toFixed(2)}</div>
-                                <div class="unit-description">Edge Pequeno • Baixo Risco</div>
+                                <div class="unit-amount">R$ ${getAdjustedStake(0.25, odd, data.unitValue)}</div>
+                                <div class="unit-description">${odd >= 4.0 ? '🛡️ ' : ''}Ajustado pela odd ${odd.toFixed(2)}</div>
                             </div>
 
-                            <div class="unit-card" style="${recommendedUnits === 0.50 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                            <div class="unit-card" style="${recommendedUnits === parseFloat(getAdjustedStake(0.50, odd, 1)) ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
                                 <div class="unit-card-header">
-                                    <span class="unit-badge">0.50u</span>
+                                    <span class="unit-badge">0.50u base</span>
                                     <span class="unit-ev-range">EV: 2-5%</span>
                                 </div>
-                                <div class="unit-amount">R$ ${(0.50 * data.unitValue).toFixed(2)}</div>
-                                <div class="unit-description">Edge Moderado • Risco Médio</div>
+                                <div class="unit-amount">R$ ${getAdjustedStake(0.50, odd, data.unitValue)}</div>
+                                <div class="unit-description">${odd >= 4.0 ? '🛡️ ' : ''}Ajustado pela odd ${odd.toFixed(2)}</div>
                             </div>
 
-                            <div class="unit-card" style="${recommendedUnits === 0.75 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                            <div class="unit-card" style="${recommendedUnits === parseFloat(getAdjustedStake(0.75, odd, 1)) ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
                                 <div class="unit-card-header">
-                                    <span class="unit-badge">0.75u</span>
+                                    <span class="unit-badge">0.75u base</span>
                                     <span class="unit-ev-range">EV: 5-8%</span>
                                 </div>
-                                <div class="unit-amount">R$ ${(0.75 * data.unitValue).toFixed(2)}</div>
-                                <div class="unit-description">Edge Bom • Risco Elevado</div>
+                                <div class="unit-amount">R$ ${getAdjustedStake(0.75, odd, data.unitValue)}</div>
+                                <div class="unit-description">${odd >= 4.0 ? '🛡️ ' : ''}Ajustado pela odd ${odd.toFixed(2)}</div>
                             </div>
 
-                            <div class="unit-card" style="${recommendedUnits === 1.00 ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
+                            <div class="unit-card" style="${recommendedUnits === parseFloat(getAdjustedStake(1.00, odd, 1)) ? 'border-color: #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);' : ''}">
                                 <div class="unit-card-header">
-                                    <span class="unit-badge">1.00u</span>
+                                    <span class="unit-badge">1.00u base</span>
                                     <span class="unit-ev-range">EV: 8%+</span>
                                 </div>
-                                <div class="unit-amount">R$ ${(1.00 * data.unitValue).toFixed(2)}</div>
-                                <div class="unit-description">Edge Excelente • Máxima Confiança</div>
+                                <div class="unit-amount">R$ ${getAdjustedStake(1.00, odd, data.unitValue)}</div>
+                                <div class="unit-description">${odd >= 4.0 ? '🛡️ ' : ''}Ajustado pela odd ${odd.toFixed(2)}</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="info-box">
                         <div class="info-title">
-                            🦊 Recomendação FoxBet
+                            🦊 Recomendação FoxBet v3.0 ${odd >= 4.0 ? '🛡️ PROTEÇÃO ATIVA!' : ''}
                         </div>
                         <div class="info-text">
-                            Baseado no seu EV de <strong>+${evPercent}%</strong>, recomendamos apostar <strong>${recommendedUnits}u</strong> (R$ ${(recommendedUnits * data.unitValue).toFixed(2)}).<br><br>
-                            O sistema de unidades permite escalar suas apostas proporcionalmente ao tamanho do edge, maximizando lucro enquanto controla risco.
+                            Baseado no EV de <strong>+${evPercent}%</strong> e odd <strong>${odd.toFixed(2)}</strong>, recomendamos apostar <strong>${recommendedUnits}u</strong> (R$ ${recommendedStake.toFixed(2)}).<br><br>
+                            ${odd >= 4.0 ? '<strong>🛡️ Stake reduzido automaticamente!</strong> Odds altas têm mais variância. Protegemos sua banca reduzindo o stake em ' + ((1 - (odd < 7.0 ? 0.50 : 0.35)) * 100).toFixed(0) + '%.<br><br>' : ''}
+                            O sistema OTIMIZADO v3.0 ajusta stakes proporcionalmente ao tamanho do edge E ao risco da odd, maximizando lucro enquanto controla variância.
                         </div>
                     </div>
                 `;
