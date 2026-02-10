@@ -513,12 +513,15 @@
                 </div>
 
                 <div class="input-section">
-                    <div style="display: flex; gap: 15px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
                         <button class="market-btn active" id="market3" onclick="selectMarket(3)">
-                            🎯 3 Resultados (1X2)
+                            🎯 3 Resultados
                         </button>
                         <button class="market-btn" id="market2" onclick="selectMarket(2)">
                             ⚡ 2 Resultados
+                        </button>
+                        <button class="market-btn" id="marketprops" onclick="selectMarket('props')">
+                            🏀 Player Props
                         </button>
                     </div>
                 </div>
@@ -562,6 +565,26 @@
                     <div class="info-pills">
                         <span class="pill">3 odds obrigatórias</span>
                         <span class="pill">Moneyline, Handicap, etc</span>
+                        <span class="pill">Separe por espaço</span>
+                    </div>
+                </div>
+
+                <div class="instruction" id="instructionprops" style="display: none;">
+                    <div class="instruction-title">
+                        <span>🏀</span>
+                        <span>Player Props:</span>
+                    </div>
+                    <div class="instruction-text">
+                        Digite as <strong>2 odds</strong> separadas por espaço:<br><br>
+                        <strong>📊 Odd 1:</strong> Referência Pinnacle<br>
+                        <strong>🎯 Odd 2:</strong> Odd onde vai apostar<br>
+                    </div>
+                    <div class="instruction-example">
+                        2.15 2.25
+                    </div>
+                    <div class="info-pills">
+                        <span class="pill">2 odds obrigatórias</span>
+                        <span class="pill">Pontos, assistências, etc</span>
                         <span class="pill">Separe por espaço</span>
                     </div>
                 </div>
@@ -627,11 +650,13 @@
             // Atualizar botões
             document.getElementById('market2').classList.remove('active');
             document.getElementById('market3').classList.remove('active');
+            document.getElementById('marketprops').classList.remove('active');
             document.getElementById('market' + market).classList.add('active');
             
             // Atualizar instruções
             document.getElementById('instruction2').style.display = market === 2 ? 'block' : 'none';
             document.getElementById('instruction3').style.display = market === 3 ? 'block' : 'none';
+            document.getElementById('instructionprops').style.display = market === 'props' ? 'block' : 'none';
             
             // Limpar resultados
             document.getElementById('results').style.display = 'none';
@@ -703,7 +728,7 @@
                     fairOdd: 1 / trueProb
                 });
 
-            } else {
+            } else if (selectedMarket === 2) {
                 // Mercado 2 resultados
                 if (odds.length !== 3) {
                     showError('🦊 Mercado 2 resultados: você precisa digitar 3 odds! Você digitou ' + odds.length);
@@ -748,6 +773,50 @@
                     bankroll,
                     unitValue,
                     fairOdd: 1 / trueProb
+                });
+            } else {
+                // Player Props
+                if (odds.length !== 2) {
+                    showError('🦊 Player Props: você precisa digitar 2 odds! Você digitou ' + odds.length);
+                    return;
+                }
+
+                if (odds.some(x => isNaN(x) || x <= 1)) {
+                    showError('🦊 Todas as odds precisam ser números maiores que 1!');
+                    return;
+                }
+
+                const [oddRef, oddTarget] = odds;
+
+                // Para props, assumimos que Pinnacle já é a odd justa
+                const trueProb = 1 / oddRef;
+                const ev = (oddTarget * trueProb) - 1;
+
+                const b = oddTarget - 1;
+                const p = trueProb;
+                const q = 1 - p;
+                
+                let kellyFraction = ((b * p) - q) / b;
+
+                if (kellyFraction < 0) {
+                    kellyFraction = 0;
+                }
+
+                if (kellyFraction > 0.20) {
+                    kellyFraction = 0.20;
+                }
+
+                const fullKelly = kellyFraction * bankroll;
+
+                displayResults({
+                    odd4: oddTarget,
+                    trueProb,
+                    ev,
+                    kellyFraction,
+                    fullKelly,
+                    bankroll,
+                    unitValue,
+                    fairOdd: oddRef
                 });
             }
         }
