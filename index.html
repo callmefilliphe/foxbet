@@ -513,7 +513,7 @@
                 </div>
 
                 <div class="input-section">
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
                         <button class="market-btn active" id="market3" onclick="selectMarket(3)">
                             🎯 3 Resultados
                         </button>
@@ -522,6 +522,9 @@
                         </button>
                         <button class="market-btn" id="marketprops" onclick="selectMarket('props')">
                             🏀 Player Props
+                        </button>
+                        <button class="market-btn" id="marketpropsfut" onclick="selectMarket('propsfut')">
+                            ⚽ Props Futebol
                         </button>
                     </div>
                 </div>
@@ -589,11 +592,101 @@
                     </div>
                 </div>
 
+                <div class="instruction" id="instructionpropsfut" style="display: none;">
+                    <div class="instruction-title">
+                        <span>⚽</span>
+                        <span>Props Futebol - Análise Avançada:</span>
+                    </div>
+                    <div class="instruction-text">
+                        Sistema com <strong>distribuição de Poisson</strong> para apostas em jogadores:<br><br>
+                        ✅ Chutes ao gol, Faltas, Desarmes<br>
+                        ✅ Considera forma recente, casa/fora<br>
+                        ✅ Ajusta por posição na tabela<br>
+                    </div>
+                    <div class="info-pills">
+                        <span class="pill">Estatísticas do jogador</span>
+                        <span class="pill">Análise probabilística</span>
+                        <span class="pill">Stake automático</span>
+                    </div>
+                </div>
+
                 <div class="section-title">
                     <span>🦊</span>
                     <span>Calcule seu Value Bet</span>
                 </div>
 
+                <!-- FORMULÁRIO PROPS FUTEBOL -->
+                <div id="formPropsFutebol" style="display: none;">
+                    <div class="input-section">
+                        <label class="input-label">⚽ Mercado:</label>
+                        <select class="odds-input" id="mercadoFut">
+                            <option value="chutes_ao_gol">Chutes no Gol</option>
+                            <option value="chutes">Chutes (Total)</option>
+                            <option value="faltas_cometidas">Faltas Cometidas</option>
+                            <option value="faltas_sofridas">Faltas Sofridas</option>
+                            <option value="desarmes">Desarmes</option>
+                            <option value="defesas">Defesas do Goleiro</option>
+                            <option value="passes">Passes Completos</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-section">
+                            <label class="input-label">📊 Linha (Over):</label>
+                            <input type="number" class="odds-input" id="linhaFut" step="0.5" value="0.5" placeholder="Ex: 0.5">
+                        </div>
+                        <div class="input-section">
+                            <label class="input-label">🎯 Odd oferecida:</label>
+                            <input type="number" class="odds-input" id="oddFut" step="0.01" value="2.00" placeholder="Ex: 2.50">
+                        </div>
+                    </div>
+
+                    <div class="input-section">
+                        <label class="input-label">📈 Média Total do Jogador:</label>
+                        <input type="number" class="odds-input" id="mediaTotalFut" step="0.01" placeholder="Ex: 1.6">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-section">
+                            <label class="input-label">🏠 Média Casa:</label>
+                            <input type="number" class="odds-input" id="mediaCasaFut" step="0.01" placeholder="Ex: 1.38">
+                        </div>
+                        <div class="input-section">
+                            <label class="input-label">✈️ Média Visitante:</label>
+                            <input type="number" class="odds-input" id="mediaVisitanteFut" step="0.01" placeholder="Ex: 1.86">
+                        </div>
+                    </div>
+
+                    <div class="input-section">
+                        <label class="input-label">📊 Últimos Jogos (separados por vírgula):</label>
+                        <input type="text" class="odds-input" id="ultimosJogosFut" placeholder="Ex: 4,0,1,2,3,3,2,1,2">
+                        <div class="info-pills">
+                            <span class="pill">Cole os números dos últimos jogos</span>
+                        </div>
+                    </div>
+
+                    <div class="input-section">
+                        <label class="input-label">⚔️ Jogador joga em:</label>
+                        <select class="odds-input" id="timeFut">
+                            <option value="mandante">Casa (Mandante)</option>
+                            <option value="visitante">Fora (Visitante)</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-section">
+                            <label class="input-label">📍 Posição Time (1-20):</label>
+                            <input type="number" class="odds-input" id="posicaoTimeFut" min="1" max="20" placeholder="Ex: 14">
+                        </div>
+                        <div class="input-section">
+                            <label class="input-label">📍 Posição Adversário (1-20):</label>
+                            <input type="number" class="odds-input" id="posicaoAdversarioFut" min="1" max="20" placeholder="Ex: 18">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FORMULÁRIO NORMAL (ODDS) -->
+                <div id="formOdds">
                 <div class="input-section">
                     <label class="input-label">📝 Digite as 4 odds:</label>
                     <textarea 
@@ -628,9 +721,13 @@
                     >
                 </div>
 
-                <button class="btn-calculate" onclick="calculateKelly()">
+                </div>
+
+                <button class="btn-calculate" onclick="calculateKelly()" id="btnCalcular">
                     🦊 Calcular Value Bet
                 </button>
+                </div>
+                <!-- FIM FORMULÁRIO ODDS -->
 
                 <div id="results" class="results"></div>
 
@@ -652,18 +749,38 @@
             document.getElementById('market2').classList.remove('active');
             document.getElementById('market3').classList.remove('active');
             document.getElementById('marketprops').classList.remove('active');
+            document.getElementById('marketpropsfut').classList.remove('active');
             document.getElementById('market' + market).classList.add('active');
             
             // Atualizar instruções
             document.getElementById('instruction2').style.display = market === 2 ? 'block' : 'none';
             document.getElementById('instruction3').style.display = market === 3 ? 'block' : 'none';
             document.getElementById('instructionprops').style.display = market === 'props' ? 'block' : 'none';
+            document.getElementById('instructionpropsfut').style.display = market === 'propsfut' ? 'block' : 'none';
+            
+            // Alternar formulários
+            const formOdds = document.getElementById('formOdds');
+            const formPropsFut = document.getElementById('formPropsFutebol');
+            
+            if (market === 'propsfut') {
+                formOdds.style.display = 'none';
+                formPropsFut.style.display = 'block';
+            } else {
+                formOdds.style.display = 'block';
+                formPropsFut.style.display = 'none';
+            }
             
             // Limpar resultados
             document.getElementById('results').style.display = 'none';
         }
 
         function calculateKelly() {
+            // Se for Props Futebol, chama função específica
+            if (selectedMarket === 'propsfut') {
+                calcularPropsFutebol();
+                return;
+            }
+            
             const input = document.getElementById('oddsInput').value.trim();
             const bankroll = parseFloat(document.getElementById('bankrollInput').value);
             const unitValue = parseFloat(document.getElementById('unitInput').value);
@@ -1014,6 +1131,245 @@
                 calculateKelly();
             }
         });
+
+        // ========================================
+        // FUNÇÕES PROPS FUTEBOL
+        // ========================================
+
+        function poissonPMF(k, lambda) {
+            if (lambda === 0) return k === 0 ? 1 : 0;
+            return (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k);
+        }
+
+        function poissonCDF(k, lambda) {
+            if (lambda === 0) return 1;
+            let sum = 0;
+            for (let i = 0; i <= Math.floor(k); i++) {
+                sum += poissonPMF(i, lambda);
+            }
+            return Math.min(sum, 1);
+        }
+
+        function factorial(n) {
+            if (n <= 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+
+        function calcularPropsFutebol() {
+            // Pegar valores
+            const linha = parseFloat(document.getElementById('linhaFut').value);
+            const odd = parseFloat(document.getElementById('oddFut').value);
+            const banca = parseFloat(document.getElementById('bankrollInput').value);
+            const unitValue = parseFloat(document.getElementById('unitInput').value);
+            const mediaTotal = parseFloat(document.getElementById('mediaTotalFut').value);
+            const mediaCasa = parseFloat(document.getElementById('mediaCasaFut').value);
+            const mediaVisitante = parseFloat(document.getElementById('mediaVisitanteFut').value);
+            const ultimosJogosStr = document.getElementById('ultimosJogosFut').value;
+            const time = document.getElementById('timeFut').value;
+            const posTime = parseInt(document.getElementById('posicaoTimeFut').value);
+            const posAdv = parseInt(document.getElementById('posicaoAdversarioFut').value);
+
+            // Validar
+            if (!mediaTotal || !mediaCasa || !mediaVisitante || !ultimosJogosStr) {
+                showError('⚽ Preencha todos os campos de estatísticas!');
+                return;
+            }
+
+            if (!posTime || !posAdv) {
+                showError('⚽ Preencha as posições dos times!');
+                return;
+            }
+
+            // Processar últimos jogos
+            const ultimosJogos = ultimosJogosStr.split(',').map(x => parseFloat(x.trim()));
+            const formaRecente = ultimosJogos.slice(0, 3).reduce((a,b) => a+b, 0) / Math.min(3, ultimosJogos.length);
+            
+            // Média específica
+            const mediaEspecifica = time === 'mandante' ? mediaCasa : mediaVisitante;
+            
+            // Média ponderada
+            let mediaPonderada = formaRecente * 0.5 + mediaEspecifica * 0.3 + mediaTotal * 0.2;
+
+            // Fator mandante/visitante
+            const fatorMV = time === 'mandante' ? 1.08 : 0.92;
+
+            // Fator confronto
+            const dif = posTime - posAdv;
+            let fatorConfronto = 1.0;
+            
+            if (dif < -5) {
+                fatorConfronto = time === 'mandante' ? 0.90 : 0.85;
+            } else if (dif < 0) {
+                fatorConfronto = time === 'mandante' ? 0.95 : 0.90;
+            } else if (dif > 5) {
+                fatorConfronto = time === 'mandante' ? 1.10 : 1.05;
+            } else if (dif > 0) {
+                fatorConfronto = time === 'mandante' ? 1.05 : 1.00;
+            }
+
+            // Lambda ajustado
+            const lambda = mediaPonderada * fatorMV * fatorConfronto;
+
+            // Probabilidade Over (Poisson)
+            const probOver = 1 - poissonCDF(linha, lambda);
+            const probReal = Math.max(0.01, Math.min(0.99, probOver));
+
+            // Expected Value
+            const ev = (odd * probReal) - 1;
+
+            // Kelly
+            const b = odd - 1;
+            const p = probReal;
+            const q = 1 - p;
+            let kellyFraction = ((b * p) - q) / b;
+            kellyFraction = Math.max(0, Math.min(kellyFraction, 0.20));
+
+            // Stake recomendado
+            function getRecommendedUnits(ev, odd) {
+                let base;
+                if (ev < 0.02) base = 0.25;
+                else if (ev < 0.05) base = 0.50;
+                else if (ev < 0.08) base = 0.75;
+                else base = 1.00;
+                
+                let mult;
+                if (odd < 2.5) mult = 1.0;
+                else if (odd < 4.0) mult = 0.75;
+                else if (odd < 7.0) mult = 0.50;
+                else mult = 0.35;
+                
+                return Math.round(base * mult * 100) / 100;
+            }
+
+            const recommendedUnits = getRecommendedUnits(ev, odd);
+            const stake = recommendedUnits * unitValue;
+
+            // Exibir resultado
+            displayPropsFutebolResult({
+                probReal,
+                ev,
+                kellyFraction,
+                recommendedUnits,
+                stake,
+                linha,
+                odd,
+                lambda,
+                unitValue,
+                mediaTotal,
+                formaRecente,
+                fatorMV,
+                fatorConfronto
+            });
+        }
+
+        function displayPropsFutebolResult(data) {
+            const resultsDiv = document.getElementById('results');
+            const evPercent = (data.ev * 100).toFixed(2);
+            const hasValue = data.ev > 0;
+            const oddJusta = (1 / data.probReal).toFixed(2);
+
+            let html = '';
+
+            if (hasValue) {
+                html = `
+                    <div class="result-header">
+                        <div class="result-title">⚽ VALUE BET FUTEBOL ENCONTRADO!</div>
+                        <div class="result-value-big">+${evPercent}%</div>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-item-label">📊 Probabilidade Real (Poisson)</div>
+                            <div class="result-item-value">${(data.probReal * 100).toFixed(2)}%</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">💎 Expected Value (EV)</div>
+                            <div class="result-item-value" style="color: #10b981;">+${evPercent}%</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">📈 Odd Justa</div>
+                            <div class="result-item-value">${oddJusta}</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">⭐ Stake Recomendado</div>
+                            <div class="result-item-value" style="color: #7c3aed;">${data.recommendedUnits}u (R$ ${data.stake.toFixed(2)})</div>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; padding: 25px; margin-top: 25px;">
+                        <div class="info-title" style="color: white; font-size: 1.3em;">
+                            🦊 Recomendação FoxBet - Props Futebol
+                        </div>
+                        <div class="info-text" style="color: white; font-size: 1.1em;">
+                            Baseado no EV de <strong>+${evPercent}%</strong> e análise probabilística (Poisson), recomendamos apostar <strong>${data.recommendedUnits}u</strong> (R$ ${data.stake.toFixed(2)}).<br><br>
+                            ⚽ Lambda ajustado: <strong>${data.lambda.toFixed(2)}</strong><br>
+                            📊 Over ${data.linha}: <strong>${(data.probReal * 100).toFixed(1)}%</strong> de chance
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">📋 Detalhes do Cálculo</div>
+                        <div class="info-text">
+                            <strong>Média Total:</strong> ${data.mediaTotal.toFixed(2)}<br>
+                            <strong>Forma Recente (3 jogos):</strong> ${data.formaRecente.toFixed(2)}<br>
+                            <strong>Fator Mandante/Visitante:</strong> ${data.fatorMV.toFixed(2)}x<br>
+                            <strong>Fator Confronto:</strong> ${data.fatorConfronto.toFixed(2)}x<br>
+                            <strong>Lambda Ajustado:</strong> ${data.lambda.toFixed(2)}<br>
+                            <strong>Kelly Criterion:</strong> ${(data.kellyFraction * 100).toFixed(2)}%
+                        </div>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div class="result-header negative">
+                        <div class="result-title">❌ SEM VALUE</div>
+                        <div class="result-value-big">${evPercent}%</div>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-item-label">📊 Probabilidade Real (Poisson)</div>
+                            <div class="result-item-value">${(data.probReal * 100).toFixed(2)}%</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">💎 Expected Value (EV)</div>
+                            <div class="result-item-value" style="color: #ef4444;">${evPercent}%</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">📈 Odd Justa</div>
+                            <div class="result-item-value">${oddJusta}</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-item-label">🎯 Odd Oferecida</div>
+                            <div class="result-item-value">${data.odd.toFixed(2)}</div>
+                        </div>
+                    </div>
+
+                    <div class="error-box">
+                        <div class="error-text">
+                            ⚽ <strong>NÃO APOSTE!</strong><br><br>
+                            A odd oferecida (${data.odd.toFixed(2)}) está abaixo do valor justo (${oddJusta}). 
+                            Esta aposta tem EV negativo baseado na análise de Poisson.<br><br>
+                            <strong>Lambda: ${data.lambda.toFixed(2)} | Prob Over: ${(data.probReal * 100).toFixed(1)}%</strong>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     </script>
 </body>
 </html>
