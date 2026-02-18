@@ -700,18 +700,9 @@
                         <input type="number" class="odds-input" id="oddFora" step="0.01" placeholder="Ex: 1.65">
                     </div>
 
-                    <div class="input-section">
-                        <label class="input-label">🎯 Lado apostado:</label>
-                        <select class="odds-input" id="ladoApostado">
-                            <option value="1">Casa (1)</option>
-                            <option value="X">Empate (X)</option>
-                            <option value="2">Fora (2)</option>
-                        </select>
-                    </div>
-
                     <div class="info-pills" style="margin-top: 15px;">
                         <span class="pill">💡 Deixe Empate vazio para 2 resultados</span>
-                        <span class="pill">📊 Calcula margem da casa automaticamente</span>
+                        <span class="pill">📊 Mostra TODAS as odds justas</span>
                     </div>
                 </div>
 
@@ -1140,7 +1131,6 @@
             const oddCasa = parseFloat(document.getElementById('oddCasa').value);
             const oddEmpateInput = document.getElementById('oddEmpate').value.trim();
             const oddFora = parseFloat(document.getElementById('oddFora').value);
-            const ladoApostado = document.getElementById('ladoApostado').value;
 
             // Validar odds obrigatórias
             if (!oddCasa || !oddFora || oddCasa <= 1 || oddFora <= 1) {
@@ -1152,7 +1142,9 @@
             const tem3Resultados = oddEmpateInput !== '';
             let oddEmpate = null;
             let juice = 0;
-            let oddJusta = 0;
+            let oddJustaCasa = 0;
+            let oddJustaEmpate = 0;
+            let oddJustaFora = 0;
 
             if (tem3Resultados) {
                 // MERCADO 3 RESULTADOS
@@ -1166,29 +1158,19 @@
                 // Fórmula: Juice = (1/Odd1 + 1/OddX + 1/Odd2) - 1
                 juice = (1/oddCasa + 1/oddEmpate + 1/oddFora) - 1;
 
-                // Calcular odd justa baseado no lado
-                if (ladoApostado === '1') {
-                    oddJusta = oddCasa * (1 + juice);
-                } else if (ladoApostado === 'X') {
-                    oddJusta = oddEmpate * (1 + juice);
-                } else {
-                    oddJusta = oddFora * (1 + juice);
-                }
+                // Calcular TODAS as odds justas
+                oddJustaCasa = oddCasa * (1 + juice);
+                oddJustaEmpate = oddEmpate * (1 + juice);
+                oddJustaFora = oddFora * (1 + juice);
 
             } else {
                 // MERCADO 2 RESULTADOS
                 // Fórmula: Juice = (1/Odd1 + 1/Odd2) - 1
                 juice = (1/oddCasa + 1/oddFora) - 1;
 
-                // Calcular odd justa baseado no lado
-                if (ladoApostado === '1') {
-                    oddJusta = oddCasa * (1 + juice);
-                } else if (ladoApostado === '2') {
-                    oddJusta = oddFora * (1 + juice);
-                } else {
-                    showError('💎 Empate não disponível em mercado 2 resultados!');
-                    return;
-                }
+                // Calcular TODAS as odds justas
+                oddJustaCasa = oddCasa * (1 + juice);
+                oddJustaFora = oddFora * (1 + juice);
             }
 
             // Exibir resultado
@@ -1196,9 +1178,10 @@
                 oddCasa,
                 oddEmpate,
                 oddFora,
-                ladoApostado,
                 juice,
-                oddJusta,
+                oddJustaCasa,
+                oddJustaEmpate,
+                oddJustaFora,
                 tem3Resultados
             });
         }
@@ -1206,22 +1189,6 @@
         function displayRemoveJuiceResult(data) {
             const resultsDiv = document.getElementById('results');
             const juicePercent = (data.juice * 100).toFixed(2);
-            
-            // Pegar odd original
-            let oddOriginal = 0;
-            if (data.ladoApostado === '1') {
-                oddOriginal = data.oddCasa;
-            } else if (data.ladoApostado === 'X') {
-                oddOriginal = data.oddEmpate;
-            } else {
-                oddOriginal = data.oddFora;
-            }
-
-            const ladoNome = {
-                '1': 'Casa (1)',
-                'X': 'Empate (X)',
-                '2': 'Fora (2)'
-            }[data.ladoApostado];
 
             let html = `
                 <div class="result-header">
@@ -1231,19 +1198,19 @@
 
                 <div class="result-grid">
                     <div class="result-item">
-                        <div class="result-item-label">🏠 Odd Casa (1)</div>
+                        <div class="result-item-label">🏠 Odd Casa Original</div>
                         <div class="result-item-value">${data.oddCasa.toFixed(2)}</div>
                     </div>
 
                     ${data.tem3Resultados ? `
                     <div class="result-item">
-                        <div class="result-item-label">⚖️ Odd Empate (X)</div>
+                        <div class="result-item-label">⚖️ Odd Empate Original</div>
                         <div class="result-item-value">${data.oddEmpate.toFixed(2)}</div>
                     </div>
                     ` : ''}
 
                     <div class="result-item">
-                        <div class="result-item-label">✈️ Odd Fora (2)</div>
+                        <div class="result-item-label">✈️ Odd Fora Original</div>
                         <div class="result-item-value">${data.oddFora.toFixed(2)}</div>
                     </div>
 
@@ -1254,53 +1221,91 @@
                 </div>
 
                 <div class="info-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 30px; margin-top: 25px;">
-                    <div class="info-title" style="color: white; font-size: 1.5em; margin-bottom: 15px;">
-                        🎯 Lado Apostado: ${ladoNome}
+                    <div class="info-title" style="color: white; font-size: 1.5em; margin-bottom: 20px; text-align: center;">
+                        💎 ODDS JUSTAS (SEM JUICE)
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
-                        <div>
-                            <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 5px;">Odd Original (com juice)</div>
-                            <div style="font-size: 2.5em; font-weight: bold;">${oddOriginal.toFixed(2)}</div>
+                    <div style="display: grid; grid-template-columns: ${data.tem3Resultados ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)'}; gap: 20px; text-align: center;">
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">🏠 Casa (1)</div>
+                            <div style="font-size: 1.1em; opacity: 0.7; margin-bottom: 5px;">${data.oddCasa.toFixed(2)}</div>
+                            <div style="font-size: 2.2em; font-weight: bold; color: #10b981;">↓</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJustaCasa.toFixed(2)}</div>
                         </div>
-                        <div>
-                            <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 5px;">💎 Odd Justa (sem juice)</div>
-                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJusta.toFixed(2)}</div>
+
+                        ${data.tem3Resultados ? `
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">⚖️ Empate (X)</div>
+                            <div style="font-size: 1.1em; opacity: 0.7; margin-bottom: 5px;">${data.oddEmpate.toFixed(2)}</div>
+                            <div style="font-size: 2.2em; font-weight: bold; color: #10b981;">↓</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJustaEmpate.toFixed(2)}</div>
+                        </div>
+                        ` : ''}
+
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">✈️ Fora (2)</div>
+                            <div style="font-size: 1.1em; opacity: 0.7; margin-bottom: 5px;">${data.oddFora.toFixed(2)}</div>
+                            <div style="font-size: 2.2em; font-weight: bold; color: #10b981;">↓</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJustaFora.toFixed(2)}</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="info-box">
-                    <div class="info-title">📊 Entenda o Cálculo</div>
+                    <div class="info-title">📊 Como Usar Essas Odds Justas</div>
                     <div class="info-text">
-                        <strong>1. Juice (Overround):</strong><br>
-                        A margem da casa é calculada somando as probabilidades implícitas:<br>
+                        <strong>1. Compare com outras casas:</strong><br>
+                        • Casa justa: <strong>${data.oddJustaCasa.toFixed(2)}</strong> → Se outra casa oferecer MAIS, há value!<br>
+                        ${data.tem3Resultados ? `• Empate justa: <strong>${data.oddJustaEmpate.toFixed(2)}</strong> → Se outra casa oferecer MAIS, há value!<br>` : ''}
+                        • Fora justa: <strong>${data.oddJustaFora.toFixed(2)}</strong> → Se outra casa oferecer MAIS, há value!<br><br>
+                        
+                        <strong>2. Exemplo prático:</strong><br>
+                        Bet365 oferece Empate @ ${data.tem3Resultados ? (data.oddJustaEmpate + 0.2).toFixed(2) : '3.50'}:<br>
+                        ${data.tem3Resultados ? `• Odd justa: ${data.oddJustaEmpate.toFixed(2)}<br>
+                        • EV = (${(data.oddJustaEmpate + 0.2).toFixed(2)} / ${data.oddJustaEmpate.toFixed(2)}) - 1 = <strong>+${(((data.oddJustaEmpate + 0.2) / data.oddJustaEmpate - 1) * 100).toFixed(1)}% ✅ VALUE!</strong><br><br>` : 
+                        `• Se odd justa Casa = ${data.oddJustaCasa.toFixed(2)}<br>
+                        • Compare e calcule o EV!<br><br>`}
+                        
+                        <strong>3. Probabilidades reais:</strong><br>
+                        • Casa: ${(100 / data.oddJustaCasa).toFixed(2)}% de chance<br>
+                        ${data.tem3Resultados ? `• Empate: ${(100 / data.oddJustaEmpate).toFixed(2)}% de chance<br>` : ''}
+                        • Fora: ${(100 / data.oddJustaFora).toFixed(2)}% de chance
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-title">🔢 Detalhes do Cálculo</div>
+                    <div class="info-text">
+                        <strong>Juice (Overround):</strong><br>
                         ${data.tem3Resultados ? 
-                            `Juice = (1/${data.oddCasa.toFixed(2)} + 1/${data.oddEmpate.toFixed(2)} + 1/${data.oddFora.toFixed(2)}) - 1 = ${juicePercent}%` :
-                            `Juice = (1/${data.oddCasa.toFixed(2)} + 1/${data.oddFora.toFixed(2)}) - 1 = ${juicePercent}%`
-                        }<br><br>
+                            `Juice = (1/${data.oddCasa.toFixed(2)} + 1/${data.oddEmpate.toFixed(2)} + 1/${data.oddFora.toFixed(2)}) - 1<br>
+                            Juice = (${(1/data.oddCasa).toFixed(4)} + ${(1/data.oddEmpate).toFixed(4)} + ${(1/data.oddFora).toFixed(4)}) - 1<br>
+                            Juice = ${(1/data.oddCasa + 1/data.oddEmpate + 1/data.oddFora).toFixed(4)} - 1<br>
+                            Juice = <strong>${juicePercent}%</strong><br><br>` :
+                            `Juice = (1/${data.oddCasa.toFixed(2)} + 1/${data.oddFora.toFixed(2)}) - 1<br>
+                            Juice = (${(1/data.oddCasa).toFixed(4)} + ${(1/data.oddFora).toFixed(4)}) - 1<br>
+                            Juice = ${(1/data.oddCasa + 1/data.oddFora).toFixed(4)} - 1<br>
+                            Juice = <strong>${juicePercent}%</strong><br><br>`
+                        }
                         
-                        <strong>2. Odd Justa:</strong><br>
-                        É a odd sem a margem da casa. Calculada como:<br>
-                        Odd Justa = Odd Original × (1 + Juice)<br>
-                        Odd Justa = ${oddOriginal.toFixed(2)} × ${(1 + data.juice).toFixed(4)} = <strong>${data.oddJusta.toFixed(2)}</strong><br><br>
-                        
-                        <strong>💡 Como usar:</strong><br>
-                        • Se você encontrar uma odd MAIOR que ${data.oddJusta.toFixed(2)} em outra casa, há value bet!<br>
-                        • Quanto maior a diferença entre odd oferecida e odd justa, maior o EV<br>
-                        • Use a odd justa como referência para comparar casas de apostas
+                        <strong>Odds Justas:</strong><br>
+                        • Odd Justa = Odd Original × (1 + Juice)<br>
+                        • Casa: ${data.oddCasa.toFixed(2)} × ${(1 + data.juice).toFixed(4)} = <strong>${data.oddJustaCasa.toFixed(2)}</strong><br>
+                        ${data.tem3Resultados ? `• Empate: ${data.oddEmpate.toFixed(2)} × ${(1 + data.juice).toFixed(4)} = <strong>${data.oddJustaEmpate.toFixed(2)}</strong><br>` : ''}
+                        • Fora: ${data.oddFora.toFixed(2)} × ${(1 + data.juice).toFixed(4)} = <strong>${data.oddJustaFora.toFixed(2)}</strong>
                     </div>
                 </div>
 
                 <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107; color: #856404;">
-                    <div class="info-title" style="color: #856404;">⚠️ Importante</div>
+                    <div class="info-title" style="color: #856404;">⚠️ Referência de Juice por Casa</div>
                     <div class="info-text" style="color: #856404;">
-                        <strong>Juice médio por casa:</strong><br>
-                        • Pinnacle: 2-3% (melhor do mercado)<br>
-                        • Bet365: 4-6%<br>
-                        • Betano: 5-7%<br>
-                        • Casas brasileiras: 7-12%<br><br>
+                        • <strong>Pinnacle:</strong> 2-3% (melhor do mercado) ✅<br>
+                        • <strong>Bet365:</strong> 4-6%<br>
+                        • <strong>Betano:</strong> 5-7%<br>
+                        • <strong>1xBet:</strong> 6-8%<br>
+                        • <strong>Casas BR médias:</strong> 7-12%<br>
+                        • <strong>Seu resultado:</strong> <strong>${juicePercent}%</strong> ${parseFloat(juicePercent) < 4 ? '✅ Ótimo!' : parseFloat(juicePercent) < 7 ? '👍 Bom' : '⚠️ Alto'}<br><br>
                         
-                        Quanto MENOR o juice, melhor para o apostador!
+                        💡 <strong>Quanto menor o juice, melhor para você!</strong>
                     </div>
                 </div>
             `;
