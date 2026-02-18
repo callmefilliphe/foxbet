@@ -520,11 +520,11 @@
                         <button class="market-btn" id="market2" onclick="selectMarket(2)">
                             ⚡ 2 Resultados
                         </button>
-                        <button class="market-btn" id="marketprops" onclick="selectMarket('props')">
-                            🏀 Player Props
-                        </button>
                         <button class="market-btn" id="marketpropsfut" onclick="selectMarket('propsfut')">
                             ⚽ Props Futebol
+                        </button>
+                        <button class="market-btn" id="marketjuice" onclick="selectMarket('juice')">
+                            💎 Remove Juice
                         </button>
                     </div>
                 </div>
@@ -572,26 +572,6 @@
                     </div>
                 </div>
 
-                <div class="instruction" id="instructionprops" style="display: none;">
-                    <div class="instruction-title">
-                        <span>🏀</span>
-                        <span>Player Props:</span>
-                    </div>
-                    <div class="instruction-text">
-                        Digite as <strong>2 odds</strong> separadas por espaço:<br><br>
-                        <strong>📊 Odd 1:</strong> Referência Pinnacle<br>
-                        <strong>🎯 Odd 2:</strong> Odd onde vai apostar<br>
-                    </div>
-                    <div class="instruction-example">
-                        2.15 2.25
-                    </div>
-                    <div class="info-pills">
-                        <span class="pill">2 odds obrigatórias</span>
-                        <span class="pill">Pontos, assistências, etc</span>
-                        <span class="pill">Separe por espaço</span>
-                    </div>
-                </div>
-
                 <div class="instruction" id="instructionpropsfut" style="display: none;">
                     <div class="instruction-title">
                         <span>⚽</span>
@@ -607,6 +587,24 @@
                         <span class="pill">Estatísticas do jogador</span>
                         <span class="pill">Análise probabilística</span>
                         <span class="pill">Stake automático</span>
+                    </div>
+                </div>
+
+                <div class="instruction" id="instructionjuice" style="display: none;">
+                    <div class="instruction-title">
+                        <span>💎</span>
+                        <span>Remove Juice (Overround):</span>
+                    </div>
+                    <div class="instruction-text">
+                        Calcula a <strong>margem da casa</strong> e a <strong>odd justa</strong> sem comissão:<br><br>
+                        ✅ Suporta 2 ou 3 resultados<br>
+                        ✅ Mostra % de juice (overround)<br>
+                        ✅ Calcula odd real sem margem<br>
+                    </div>
+                    <div class="info-pills">
+                        <span class="pill">2 ou 3 odds</span>
+                        <span class="pill">Descobre margem oculta</span>
+                        <span class="pill">Odd justa calculada</span>
                     </div>
                 </div>
 
@@ -685,6 +683,38 @@
                     </div>
                 </div>
 
+                <!-- FORMULÁRIO REMOVE JUICE -->
+                <div id="formJuice" style="display: none;">
+                    <div class="input-section">
+                        <label class="input-label">💎 Odd Casa (1):</label>
+                        <input type="number" class="odds-input" id="oddCasa" step="0.01" placeholder="Ex: 3.88">
+                    </div>
+
+                    <div class="input-section">
+                        <label class="input-label">💎 Odd Empate (X) - <small>deixe vazio se for mercado 2 resultados</small>:</label>
+                        <input type="number" class="odds-input" id="oddEmpate" step="0.01" placeholder="Ex: 3.61 (ou deixe vazio)">
+                    </div>
+
+                    <div class="input-section">
+                        <label class="input-label">💎 Odd Fora (2):</label>
+                        <input type="number" class="odds-input" id="oddFora" step="0.01" placeholder="Ex: 1.65">
+                    </div>
+
+                    <div class="input-section">
+                        <label class="input-label">🎯 Lado apostado:</label>
+                        <select class="odds-input" id="ladoApostado">
+                            <option value="1">Casa (1)</option>
+                            <option value="X">Empate (X)</option>
+                            <option value="2">Fora (2)</option>
+                        </select>
+                    </div>
+
+                    <div class="info-pills" style="margin-top: 15px;">
+                        <span class="pill">💡 Deixe Empate vazio para 2 resultados</span>
+                        <span class="pill">📊 Calcula margem da casa automaticamente</span>
+                    </div>
+                </div>
+
                 <!-- FORMULÁRIO NORMAL (ODDS) -->
                 <div id="formOdds">
                 <div class="input-section">
@@ -748,26 +778,33 @@
             // Atualizar botões
             document.getElementById('market2').classList.remove('active');
             document.getElementById('market3').classList.remove('active');
-            document.getElementById('marketprops').classList.remove('active');
             document.getElementById('marketpropsfut').classList.remove('active');
+            document.getElementById('marketjuice').classList.remove('active');
             document.getElementById('market' + market).classList.add('active');
             
             // Atualizar instruções
             document.getElementById('instruction2').style.display = market === 2 ? 'block' : 'none';
             document.getElementById('instruction3').style.display = market === 3 ? 'block' : 'none';
-            document.getElementById('instructionprops').style.display = market === 'props' ? 'block' : 'none';
             document.getElementById('instructionpropsfut').style.display = market === 'propsfut' ? 'block' : 'none';
+            document.getElementById('instructionjuice').style.display = market === 'juice' ? 'block' : 'none';
             
             // Alternar formulários
             const formOdds = document.getElementById('formOdds');
             const formPropsFut = document.getElementById('formPropsFutebol');
+            const formJuice = document.getElementById('formJuice');
             
             if (market === 'propsfut') {
                 formOdds.style.display = 'none';
                 formPropsFut.style.display = 'block';
+                formJuice.style.display = 'none';
+            } else if (market === 'juice') {
+                formOdds.style.display = 'none';
+                formPropsFut.style.display = 'none';
+                formJuice.style.display = 'block';
             } else {
                 formOdds.style.display = 'block';
                 formPropsFut.style.display = 'none';
+                formJuice.style.display = 'none';
             }
             
             // Limpar resultados
@@ -778,6 +815,12 @@
             // Se for Props Futebol, chama função específica
             if (selectedMarket === 'propsfut') {
                 calcularPropsFutebol();
+                return;
+            }
+            
+            // Se for Remove Juice, chama função específica
+            if (selectedMarket === 'juice') {
+                calcularRemoveJuice();
                 return;
             }
             
@@ -846,7 +889,7 @@
                     fairOdd: 1 / trueProb
                 });
 
-            } else if (selectedMarket === 2) {
+            } else {
                 // Mercado 2 resultados
                 if (odds.length !== 3) {
                     showError('🦊 Mercado 2 resultados: você precisa digitar 3 odds! Você digitou ' + odds.length);
@@ -891,50 +934,6 @@
                     bankroll,
                     unitValue,
                     fairOdd: 1 / trueProb
-                });
-            } else {
-                // Player Props
-                if (odds.length !== 2) {
-                    showError('🦊 Player Props: você precisa digitar 2 odds! Você digitou ' + odds.length);
-                    return;
-                }
-
-                if (odds.some(x => isNaN(x) || x <= 1)) {
-                    showError('🦊 Todas as odds precisam ser números maiores que 1!');
-                    return;
-                }
-
-                const [oddRef, oddTarget] = odds;
-
-                // Para props, assumimos que Pinnacle já é a odd justa
-                const trueProb = 1 / oddRef;
-                const ev = (oddTarget * trueProb) - 1;
-
-                const b = oddTarget - 1;
-                const p = trueProb;
-                const q = 1 - p;
-                
-                let kellyFraction = ((b * p) - q) / b;
-
-                if (kellyFraction < 0) {
-                    kellyFraction = 0;
-                }
-
-                if (kellyFraction > 0.20) {
-                    kellyFraction = 0.20;
-                }
-
-                const fullKelly = kellyFraction * bankroll;
-
-                displayResults({
-                    odd4: oddTarget,
-                    trueProb,
-                    ev,
-                    kellyFraction,
-                    fullKelly,
-                    bankroll,
-                    unitValue,
-                    fairOdd: oddRef
                 });
             }
         }
@@ -1131,6 +1130,185 @@
                 calculateKelly();
             }
         });
+
+        // ========================================
+        // FUNÇÕES REMOVE JUICE
+        // ========================================
+
+        function calcularRemoveJuice() {
+            // Pegar valores
+            const oddCasa = parseFloat(document.getElementById('oddCasa').value);
+            const oddEmpateInput = document.getElementById('oddEmpate').value.trim();
+            const oddFora = parseFloat(document.getElementById('oddFora').value);
+            const ladoApostado = document.getElementById('ladoApostado').value;
+
+            // Validar odds obrigatórias
+            if (!oddCasa || !oddFora || oddCasa <= 1 || oddFora <= 1) {
+                showError('💎 Preencha as odds Casa e Fora corretamente! (devem ser > 1)');
+                return;
+            }
+
+            // Verificar se é 2 ou 3 resultados
+            const tem3Resultados = oddEmpateInput !== '';
+            let oddEmpate = null;
+            let juice = 0;
+            let oddJusta = 0;
+
+            if (tem3Resultados) {
+                // MERCADO 3 RESULTADOS
+                oddEmpate = parseFloat(oddEmpateInput);
+                
+                if (!oddEmpate || oddEmpate <= 1) {
+                    showError('💎 Odd Empate inválida! (deve ser > 1)');
+                    return;
+                }
+
+                // Fórmula: Juice = (1/Odd1 + 1/OddX + 1/Odd2) - 1
+                juice = (1/oddCasa + 1/oddEmpate + 1/oddFora) - 1;
+
+                // Calcular odd justa baseado no lado
+                if (ladoApostado === '1') {
+                    oddJusta = oddCasa * (1 + juice);
+                } else if (ladoApostado === 'X') {
+                    oddJusta = oddEmpate * (1 + juice);
+                } else {
+                    oddJusta = oddFora * (1 + juice);
+                }
+
+            } else {
+                // MERCADO 2 RESULTADOS
+                // Fórmula: Juice = (1/Odd1 + 1/Odd2) - 1
+                juice = (1/oddCasa + 1/oddFora) - 1;
+
+                // Calcular odd justa baseado no lado
+                if (ladoApostado === '1') {
+                    oddJusta = oddCasa * (1 + juice);
+                } else if (ladoApostado === '2') {
+                    oddJusta = oddFora * (1 + juice);
+                } else {
+                    showError('💎 Empate não disponível em mercado 2 resultados!');
+                    return;
+                }
+            }
+
+            // Exibir resultado
+            displayRemoveJuiceResult({
+                oddCasa,
+                oddEmpate,
+                oddFora,
+                ladoApostado,
+                juice,
+                oddJusta,
+                tem3Resultados
+            });
+        }
+
+        function displayRemoveJuiceResult(data) {
+            const resultsDiv = document.getElementById('results');
+            const juicePercent = (data.juice * 100).toFixed(2);
+            
+            // Pegar odd original
+            let oddOriginal = 0;
+            if (data.ladoApostado === '1') {
+                oddOriginal = data.oddCasa;
+            } else if (data.ladoApostado === 'X') {
+                oddOriginal = data.oddEmpate;
+            } else {
+                oddOriginal = data.oddFora;
+            }
+
+            const ladoNome = {
+                '1': 'Casa (1)',
+                'X': 'Empate (X)',
+                '2': 'Fora (2)'
+            }[data.ladoApostado];
+
+            let html = `
+                <div class="result-header">
+                    <div class="result-title">💎 JUICE REMOVIDO!</div>
+                    <div class="result-value-big">${juicePercent}%</div>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-item-label">🏠 Odd Casa (1)</div>
+                        <div class="result-item-value">${data.oddCasa.toFixed(2)}</div>
+                    </div>
+
+                    ${data.tem3Resultados ? `
+                    <div class="result-item">
+                        <div class="result-item-label">⚖️ Odd Empate (X)</div>
+                        <div class="result-item-value">${data.oddEmpate.toFixed(2)}</div>
+                    </div>
+                    ` : ''}
+
+                    <div class="result-item">
+                        <div class="result-item-label">✈️ Odd Fora (2)</div>
+                        <div class="result-item-value">${data.oddFora.toFixed(2)}</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-item-label">💰 Margem da Casa (Juice)</div>
+                        <div class="result-item-value" style="color: #ef4444;">${juicePercent}%</div>
+                    </div>
+                </div>
+
+                <div class="info-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 30px; margin-top: 25px;">
+                    <div class="info-title" style="color: white; font-size: 1.5em; margin-bottom: 15px;">
+                        🎯 Lado Apostado: ${ladoNome}
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
+                        <div>
+                            <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 5px;">Odd Original (com juice)</div>
+                            <div style="font-size: 2.5em; font-weight: bold;">${oddOriginal.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 5px;">💎 Odd Justa (sem juice)</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJusta.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-title">📊 Entenda o Cálculo</div>
+                    <div class="info-text">
+                        <strong>1. Juice (Overround):</strong><br>
+                        A margem da casa é calculada somando as probabilidades implícitas:<br>
+                        ${data.tem3Resultados ? 
+                            `Juice = (1/${data.oddCasa.toFixed(2)} + 1/${data.oddEmpate.toFixed(2)} + 1/${data.oddFora.toFixed(2)}) - 1 = ${juicePercent}%` :
+                            `Juice = (1/${data.oddCasa.toFixed(2)} + 1/${data.oddFora.toFixed(2)}) - 1 = ${juicePercent}%`
+                        }<br><br>
+                        
+                        <strong>2. Odd Justa:</strong><br>
+                        É a odd sem a margem da casa. Calculada como:<br>
+                        Odd Justa = Odd Original × (1 + Juice)<br>
+                        Odd Justa = ${oddOriginal.toFixed(2)} × ${(1 + data.juice).toFixed(4)} = <strong>${data.oddJusta.toFixed(2)}</strong><br><br>
+                        
+                        <strong>💡 Como usar:</strong><br>
+                        • Se você encontrar uma odd MAIOR que ${data.oddJusta.toFixed(2)} em outra casa, há value bet!<br>
+                        • Quanto maior a diferença entre odd oferecida e odd justa, maior o EV<br>
+                        • Use a odd justa como referência para comparar casas de apostas
+                    </div>
+                </div>
+
+                <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107; color: #856404;">
+                    <div class="info-title" style="color: #856404;">⚠️ Importante</div>
+                    <div class="info-text" style="color: #856404;">
+                        <strong>Juice médio por casa:</strong><br>
+                        • Pinnacle: 2-3% (melhor do mercado)<br>
+                        • Bet365: 4-6%<br>
+                        • Betano: 5-7%<br>
+                        • Casas brasileiras: 7-12%<br><br>
+                        
+                        Quanto MENOR o juice, melhor para o apostador!
+                    </div>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
 
         // ========================================
         // FUNÇÕES PROPS FUTEBOL
