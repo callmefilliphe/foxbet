@@ -480,17 +480,234 @@
             font-weight: bold;
         }
 
+        /* Botões de copiar odds */
+        button[onclick^="copiarOddJusta"]:hover,
+        button[onclick="copiarTodasOdds()"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.6) !important;
+        }
+
+        button[onclick^="copiarOddJusta"]:active,
+        button[onclick="copiarTodasOdds()"]:active {
+            transform: translateY(0);
+        }
+
+        /* ===================================== */
+        /* RESPONSIVIDADE MOBILE */
+        /* ===================================== */
+
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .bot-header {
+                padding: 25px 20px;
+            }
+
+            .fox-logo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .fox-icon {
+                font-size: 50px;
+            }
+
+            .brand-title {
+                font-size: 2em;
+                letter-spacing: 1px;
+            }
+
+            .brand-tagline {
+                font-size: 0.9em;
+            }
+
+            .bot-body {
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 1.1em;
+            }
+
+            /* Botões de mercado em grid 2x2 */
+            .market-btn {
+                padding: 12px 8px;
+                font-size: 0.85em;
+                white-space: nowrap;
+            }
+
+            /* Inputs menores */
+            .odds-input,
+            .bankroll-input,
+            .unit-input {
+                padding: 14px;
+                font-size: 1em;
+            }
+
+            /* Botão calcular */
+            .btn-calculate {
+                padding: 16px;
+                font-size: 1.1em;
+                letter-spacing: 1px;
+            }
+
+            /* Grid de resultados */
             .units-grid {
                 grid-template-columns: 1fr;
             }
 
-            .brand-title {
+            .result-value-big {
                 font-size: 2.2em;
             }
 
+            .result-title {
+                font-size: 1.3em;
+            }
+
+            .result-item-value {
+                font-size: 1.6em;
+            }
+
+            /* Remove Juice - Cards menores */
+            .result-grid {
+                gap: 12px;
+            }
+
+            .result-item {
+                padding: 18px;
+            }
+
+            /* Texto menor em info boxes */
+            .info-box {
+                font-size: 0.9em;
+                padding: 15px;
+            }
+
+            .info-title {
+                font-size: 1em;
+            }
+
+            /* Pills menores */
+            .pill {
+                font-size: 0.75em;
+                padding: 6px 12px;
+            }
+
+            /* Instrução */
+            .instruction {
+                padding: 15px;
+            }
+
+            .instruction-title {
+                font-size: 1em;
+            }
+
+            .instruction-text {
+                font-size: 0.85em;
+            }
+
+            .instruction-example {
+                font-size: 1em;
+                padding: 12px;
+            }
+
+            /* Units section */
+            .units-section {
+                padding: 20px;
+            }
+
+            .units-title {
+                font-size: 1.2em;
+            }
+
+            .units-subtitle {
+                font-size: 0.85em;
+            }
+
+            .unit-card {
+                padding: 15px;
+            }
+
+            .unit-badge {
+                font-size: 1em;
+            }
+
+            .unit-amount {
+                font-size: 1.4em;
+            }
+
+            .unit-description {
+                font-size: 0.8em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brand-title {
+                font-size: 1.6em;
+            }
+
+            .brand-tagline {
+                font-size: 0.8em;
+            }
+
+            .fox-logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .fox-icon {
+                font-size: 40px;
+            }
+
+            .market-btn {
+                font-size: 0.8em;
+                padding: 10px 6px;
+            }
+
             .result-value-big {
-                font-size: 2.5em;
+                font-size: 1.8em;
+            }
+
+            .result-item-value {
+                font-size: 1.4em;
+            }
+
+            .btn-calculate {
+                font-size: 1em;
+                padding: 14px;
+            }
+
+            /* Props Futebol - Grid 1 coluna no mobile */
+            #formPropsFutebol > div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Remove Juice - Odds Justas em stack vertical */
+            .odds-justas-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+
+            .odd-justa-card {
+                padding: 15px !important;
+            }
+
+            .odd-justa-card > div {
+                font-size: 0.8em !important;
+            }
+
+            .odd-justa-card > div:nth-child(2) {
+                font-size: 0.9em !important;
+            }
+
+            .odd-justa-card > div:nth-child(3) {
+                font-size: 1.5em !important;
+            }
+
+            .odd-justa-card > div:nth-child(4) {
+                font-size: 2em !important;
             }
         }
     </style>
@@ -513,7 +730,7 @@
                 </div>
 
                 <div class="input-section">
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
                         <button class="market-btn active" id="market3" onclick="selectMarket(3)">
                             🎯 3 Resultados
                         </button>
@@ -1123,6 +1340,119 @@
         });
 
         // ========================================
+        // FUNÇÕES DE COPIAR ODDS JUSTAS
+        // ========================================
+
+        function copiarOddJusta(elementId) {
+            const elemento = document.getElementById(elementId);
+            const texto = elemento.textContent;
+            
+            // Copiar para clipboard
+            navigator.clipboard.writeText(texto).then(() => {
+                // Feedback visual - procurar o botão que foi clicado
+                const botoes = document.querySelectorAll(`button[onclick="copiarOddJusta('${elementId}')"]`);
+                const botao = botoes[0];
+                
+                if (botao) {
+                    const textoOriginal = botao.textContent;
+                    botao.textContent = '✅ Copiado!';
+                    botao.style.background = '#059669';
+                    
+                    setTimeout(() => {
+                        botao.textContent = textoOriginal;
+                        botao.style.background = '#10b981';
+                    }, 2000);
+                }
+                
+                mostrarToast(`✅ Odd ${texto} copiada!`);
+            }).catch(() => {
+                // Fallback para navegadores antigos
+                const input = document.createElement('input');
+                input.value = texto;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                
+                alert('✅ Odd copiada: ' + texto);
+            });
+        }
+
+        function copiarTodasOdds() {
+            const oddCasa = document.getElementById('oddJustaCasa');
+            const oddEmpate = document.getElementById('oddJustaEmpate');
+            const oddFora = document.getElementById('oddJustaFora');
+            
+            let texto = '';
+            if (oddEmpate) {
+                // 3 resultados
+                texto = `${oddCasa.textContent} ${oddEmpate.textContent} ${oddFora.textContent}`;
+            } else {
+                // 2 resultados
+                texto = `${oddCasa.textContent} ${oddFora.textContent}`;
+            }
+            
+            // Copiar para clipboard
+            navigator.clipboard.writeText(texto).then(() => {
+                // Feedback visual
+                const botao = event.target;
+                const textoOriginal = botao.innerHTML;
+                botao.innerHTML = '✅ Copiado!';
+                botao.style.background = '#059669';
+                
+                setTimeout(() => {
+                    botao.innerHTML = textoOriginal;
+                    botao.style.background = '#10b981';
+                }, 2000);
+                
+                // Mostrar toast
+                mostrarToast('📋 Odds copiadas! Cole na aba 3 ou 2 Resultados + odd da casa');
+            }).catch(() => {
+                // Fallback
+                const input = document.createElement('input');
+                input.value = texto;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                
+                alert('✅ Odds copiadas: ' + texto);
+            });
+        }
+
+        function mostrarToast(mensagem) {
+            // Criar toast se não existir
+            let toast = document.getElementById('foxbet-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'foxbet-toast';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 30px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
+                    font-weight: 600;
+                    z-index: 10000;
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            toast.textContent = mensagem;
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // ========================================
         // FUNÇÕES REMOVE JUICE
         // ========================================
 
@@ -1224,30 +1554,59 @@
                     <div class="info-title" style="color: white; font-size: 1.5em; margin-bottom: 20px; text-align: center;">
                         💎 ODDS JUSTAS (SEM JUICE)
                     </div>
-                    <div style="display: grid; grid-template-columns: ${data.tem3Resultados ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)'}; gap: 20px; text-align: center;">
-                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
+                    <div class="odds-justas-grid" style="display: grid; grid-template-columns: ${data.tem3Resultados ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)'}; gap: 20px; text-align: center;">
+                        <div class="odd-justa-card" style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
                             <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">🏠 Casa (1)</div>
                             <div style="font-size: 1.1em; opacity: 0.7; margin-bottom: 5px;">${data.oddCasa.toFixed(2)}</div>
                             <div style="font-size: 2.2em; font-weight: bold; color: #10b981;">↓</div>
-                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJustaCasa.toFixed(2)}</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;" id="oddJustaCasa">${data.oddJustaCasa.toFixed(2)}</div>
+                            <button onclick="copiarOddJusta('oddJustaCasa')" style="margin-top: 10px; padding: 8px 15px; background: #10b981; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: all 0.3s;">
+                                📋 Copiar
+                            </button>
                         </div>
 
                         ${data.tem3Resultados ? `
-                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
+                        <div class="odd-justa-card" style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
                             <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">⚖️ Empate (X)</div>
                             <div style="font-size: 1.1em; opacity: 0.7; margin-bottom: 5px;">${data.oddEmpate.toFixed(2)}</div>
                             <div style="font-size: 2.2em; font-weight: bold; color: #10b981;">↓</div>
-                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJustaEmpate.toFixed(2)}</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;" id="oddJustaEmpate">${data.oddJustaEmpate.toFixed(2)}</div>
+                            <button onclick="copiarOddJusta('oddJustaEmpate')" style="margin-top: 10px; padding: 8px 15px; background: #10b981; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: all 0.3s;">
+                                📋 Copiar
+                            </button>
                         </div>
                         ` : ''}
 
-                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
+                        <div class="odd-justa-card" style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);">
                             <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 8px;">✈️ Fora (2)</div>
                             <div style="font-size: 1.1em; opacity: 0.7; margin-bottom: 5px;">${data.oddFora.toFixed(2)}</div>
                             <div style="font-size: 2.2em; font-weight: bold; color: #10b981;">↓</div>
-                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;">${data.oddJustaFora.toFixed(2)}</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #10b981;" id="oddJustaFora">${data.oddJustaFora.toFixed(2)}</div>
+                            <button onclick="copiarOddJusta('oddJustaFora')" style="margin-top: 10px; padding: 8px 15px; background: #10b981; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: all 0.3s;">
+                                📋 Copiar
+                            </button>
                         </div>
                     </div>
+
+                    ${data.tem3Resultados ? `
+                    <div style="margin-top: 25px; text-align: center;">
+                        <button onclick="copiarTodasOdds()" style="padding: 15px 30px; background: #10b981; border: none; border-radius: 12px; color: white; cursor: pointer; font-size: 1.1em; font-weight: 700; transition: all 0.3s; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);">
+                            📋 Copiar Todas (${data.oddJustaCasa.toFixed(2)} ${data.oddJustaEmpate.toFixed(2)} ${data.oddJustaFora.toFixed(2)})
+                        </button>
+                        <div style="margin-top: 10px; font-size: 0.85em; opacity: 0.8;">
+                            💡 Cole na aba "3 Resultados" + odd da casa que quer testar
+                        </div>
+                    </div>
+                    ` : `
+                    <div style="margin-top: 25px; text-align: center;">
+                        <button onclick="copiarTodasOdds()" style="padding: 15px 30px; background: #10b981; border: none; border-radius: 12px; color: white; cursor: pointer; font-size: 1.1em; font-weight: 700; transition: all 0.3s; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);">
+                            📋 Copiar Ambas (${data.oddJustaCasa.toFixed(2)} ${data.oddJustaFora.toFixed(2)})
+                        </button>
+                        <div style="margin-top: 10px; font-size: 0.85em; opacity: 0.8;">
+                            💡 Cole na aba "2 Resultados" + odd da casa que quer testar
+                        </div>
+                    </div>
+                    `}
                 </div>
 
                 <div class="info-box">
